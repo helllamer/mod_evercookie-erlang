@@ -26,7 +26,15 @@ new(Id, Context) ->
 
 %% @doc extract id from cookie body, produces by new/1.
 get_id(Cookie, Context) ->
-    z_utils:depicke(Cookie, Context).
+    try
+	Id = z_utils:depicke(Cookie, Context),
+	{ok, Id}
+
+    catch _:_ ->
+	{error, badarg}
+
+    end.
+
 
 
 %% @doc convert atom alias to name of cookie (string)

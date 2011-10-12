@@ -12,6 +12,8 @@
 
 m_find_value(new, #m{value=undefined}, Context) ->
     mod_evercookie:new(Context);
+m_find_value(name, #m{value=undefined}, _Context) ->
+    ?COOKIE;
 m_find_value(Atom, #m{value=undefined} = M, _Context) when is_atom(M) ->
     M#m{value=Atom};
 
@@ -19,8 +21,6 @@ m_find_value(Id, #m{value=pickle}, Context) ->
     mod_evercookie:new(Id, Context);
 m_find_value(V,  #m{value=depickle}, Context) ->
     mod_evercookie:get_id(V, Context);
-m_find_value(N,    #m{value=name}, _Context) -> 
-    mod_evercookie:atom_to_cookiename(N);
 
 m_find_value(_, _M, _Context) ->
     undefined.

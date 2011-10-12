@@ -18,9 +18,7 @@
  * -samy kamkar
  */
 
-var_dump($argv);
-
-$cookie = $argv[1];
+$cookie = $_SERVER['argv'][1];
 
 // width of 200 means 600 bytes (3 RGB bytes per pixel)
 $x = 200;
@@ -34,7 +32,7 @@ $x = 0;
 $y = 0;
 for ($i = 0; $i < count($data_arr); $i += 3)
 {
-	$color = imagecolorallocate($gd, ord($data_arr[$i]), ord($data_arr[$i+1]), ord($data_arr[$i+2]));
+	@$color = imagecolorallocate($gd, ord($data_arr[$i]), ord($data_arr[$i+1]), ord($data_arr[$i+2]));
 	imagesetpixel($gd, $x++, $y, $color);
 }
  

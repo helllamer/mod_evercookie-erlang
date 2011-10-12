@@ -8,9 +8,7 @@
 -define(DATE_EXPIRES,         {{2031,10,12},{12,37,11}}).
 
 
--define(COOKIE_CACHE,         "z_ecc").
--define(COOKIE_ETAG,	      "z_ect").
--define(COOKIE_PNG,	      "z_ecp").
+-define(COOKIE,		      "z_ec").
 
 
 -endif.

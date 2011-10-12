@@ -15,7 +15,7 @@ init(DispatchArgs) -> {ok, DispatchArgs}.
 
 %% if cookie is set - ensure the etag. Result is cookie/etag body
 to_html(ReqData, DispatchArgs) ->
-    {Result, ResultReqData} = case wrq:get_cookie_value(?COOKIE_ETAG, ReqData) of
+    {Result, ResultReqData} = case wrq:get_cookie_value(?COOKIE, ReqData) of
 	%% we don't have a cookie, so we're not setting it
 	undefined ->
 	    Etag    = wrq:get_req_header("If-None-Match", ReqData),

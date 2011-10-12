@@ -1,5 +1,5 @@
 <?php
-/* evercookie, originall written by samy kamkar, 09/20/2010
+/* evercookie, originally written by samy kamkar, 09/20/2010
  *  http://samy.pl : code@samy.pl
  *
  * This is the server-side variable PNG generator for evercookie.

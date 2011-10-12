@@ -1,3 +1,5 @@
 [
-    {evercookie_png,  ["ecookie", "png"],	resource_evercookie_png,	[{ssl, any}]}
+    {evercookie_png,	["ec", "p"],	resource_evercookie_png,	[{ssl, any}]},
+    {evercookie_cache,	["ec", "c"],	resource_evercookie_cache,	[{ssl, any}]},
+    {evercookie_etag,	["ec", "t"],	resource_evercookie_etag,	[{ssl, any}]}
 ].

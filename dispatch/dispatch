@@ -1,0 +1,3 @@
+[
+    {evercookie_png,  ["ecookie", "png"],	resource_evercookie_png,	[{ssl, any}]}
+].

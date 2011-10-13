@@ -5,12 +5,15 @@
 
 -export([event/2]).
 
+-include("zotonic.hrl").
+
 %% @doc receive evercookie from js and make broadcast notification if all ok
 event({postback, cookie, _TriggerId, _TargetId}, Context) ->
     CookieValue = z_context:get_q("cookie", Context),
     case mod_evercookie:get_id(CookieValue, Context) of
 	{ok, Id} -> 
 	    %% all ok - send async broadcast
+	    ?DEBUG({broadcast, Id}),
 	    z_notifier:notify({evercookie_id, Id}, Context);
 
 	_ -> ok

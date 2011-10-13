@@ -7,6 +7,8 @@
 	init/1,
 	service_available/2,
 	content_types_provided/2,
+	last_modified/2,
+	expires/2,
 	provide_png/2
     ]).
 
@@ -20,6 +22,7 @@ init(DispatchArgs) -> {ok, DispatchArgs}.
 %% @doc we don't have a cookie, user probably deleted it, force cache
 service_available(ReqData, _DispatchArgs) ->
     Cookie = wrq:get_cookie_value(?COOKIE_PNG, ReqData),
+    ?DEBUG({?COOKIE_PNG, Cookie}),
     Result = case Cookie of
 	undefined -> {halt, 304};
 	_	  -> true
@@ -27,23 +30,41 @@ service_available(ReqData, _DispatchArgs) ->
     {Result, ReqData, Cookie}.
 
 
-%% @doc only png output
+%% @doc forge png output
 content_types_provided(ReqData, Cookie) ->
     Result = [{"image/png", provide_png}],
     {Result, ReqData, Cookie}.
 
+last_modified(ReqData, Cookie) ->
+    ReqData1 = evercookie_lib:set_cache_control(ReqData),
+    {?DATE_LAST_MODIFIED, ReqData1, Cookie}.
+
+expires(ReqData, Cookie) ->
+    {?DATE_EXPIRES, ReqData, Cookie}.
+
 
 provide_png(ReqData, Cookie) -> 
     PhpScript = filename:join([z_utils:lib_dir(priv), "modules", "mod_evercookie", "php_src", "evercookie_png.php"]),
-    Port = open_port({spawn, "php '" ++ PhpScript ++ "' '" ++ Cookie ++ "'"}, [stream, eof, exit_status, binary]),
-    Png  = receive {Port, {data, Bin}} -> Bin	       after 500 -> timeout end,
-    _End = receive {Port, {exit_status, Exit}} -> Exit after 100 -> timeout end,
-    Hdrs = [
-	{"Last-Modified", httpd_util:rfc1123_date(?DATE_LAST_MODIFIED)},
-	{"Expires",	  httpd_util:rfc1123_date(?DATE_EXPIRES)},
-	{"Cache-Control", "private, max-age=630720000"}
-    ],
+    Cmd	 = "php '" ++ PhpScript ++ "' '" ++ Cookie ++ "'",
+    ?DEBUG(Cmd),
+    {ok, Png} = dump_stdio(Cmd),
     %% and set caching headers
-    ReqData1 = wrq:merge_resp_headers(Hdrs, ReqData),
-    {Png, ReqData1, Cookie}.
+    {Png, ReqData, Cookie}.
 
+
+dump_stdio(Cmd) ->
+    Port = open_port({spawn, Cmd}, [use_stdio, exit_status, binary]),
+    dump_stdio(Port, []).
+
+dump_stdio(Port, Acc) ->
+    receive
+	{Port, {data, Bin}} -> 
+	    dump_stdio(Port, [Bin | Acc]);
+
+	{Port, {exit_status, _Exit}} ->
+	    {ok, lists:reverse(Acc)}
+
+	after 1000 ->
+	    {error, timeout}
+
+    end.

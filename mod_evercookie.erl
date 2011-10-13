@@ -49,14 +49,14 @@ alias2name(etag)	-> ?COOKIE_ETAG.
 base64_transform(X) -> base64_transform(X, <<>>).
 base64_transform(<<$+, Rest/binary>>, Acc) -> base64_transform(Rest, <<$-, Acc/binary>>);
 base64_transform(<<$/, Rest/binary>>, Acc) -> base64_transform(Rest, <<$_, Acc/binary>>);
-base64_transform(<<$=, Rest/binary>>, Acc) -> base64_transform(Rest, <<$:, Acc/binary>>);
+base64_transform(<<$=, Rest/binary>>, Acc) -> base64_transform(Rest, <<$., Acc/binary>>);
 base64_transform(<<C,  Rest/binary>>, Acc) -> base64_transform(Rest, <<C,  Acc/binary>>);
 base64_transform(<<>>, Acc) -> Acc.
 
 base64_untransform(X) -> base64_untransform(X, <<>>).
 base64_untransform(<<$-, Rest/binary>>, Acc) -> base64_untransform(Rest, <<$+, Acc/binary>>);
 base64_untransform(<<$_, Rest/binary>>, Acc) -> base64_untransform(Rest, <<$/, Acc/binary>>);
-base64_untransform(<<$:, Rest/binary>>, Acc) -> base64_untransform(Rest, <<$=, Acc/binary>>);
+base64_untransform(<<$., Rest/binary>>, Acc) -> base64_untransform(Rest, <<$=, Acc/binary>>);
 base64_untransform(<<C,  Rest/binary>>, Acc) -> base64_untransform(Rest, <<C,  Acc/binary>>);
 base64_untransform(<<>>, Acc) -> Acc.
 

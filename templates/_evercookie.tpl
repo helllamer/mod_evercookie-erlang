@@ -1,7 +1,7 @@
 <script type="text/javascript">
   
   var _cookievalue = '{{ m.evercookie.new }}';
-  var _cookiename = '{{ m.evercookie.name }}';
+  var _cookiename = '{{ m.evercookie.name.png }}';
   
   var _evercookie_png = '{% url evercookie_png %}';
   var _evercookie_cache = '{% url evercookie_cache %}';

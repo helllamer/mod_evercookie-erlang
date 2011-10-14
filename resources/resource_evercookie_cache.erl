@@ -19,11 +19,9 @@
 
 init(DispatchArgs) -> {ok, DispatchArgs}.
 
-
 %% @doc we don't have a cookie, user probably deleted it, force cache
 service_available(ReqData, _DispatchArgs) ->
     Cookie = wrq:get_cookie_value(?COOKIE_CACHE, ReqData),
-    ?DEBUG({?COOKIE_CACHE, Cookie}),
     Result = case Cookie of
 	undefined -> {halt, 304};
 	_	  -> true
@@ -31,17 +29,20 @@ service_available(ReqData, _DispatchArgs) ->
     {Result, ReqData, Cookie}.
 
 content_types_provided(ReqData, DispatchArgs) ->
-    CT = {"image/png", provide_content},
+    CT = {"text/javascript", provide_content},
     {[CT], ReqData, DispatchArgs}.
 
 last_modified(ReqData, Cookie) ->
     ReqData1 = evercookie_lib:set_cache_control(ReqData),
     {?DATE_LAST_MODIFIED, ReqData1, Cookie}.
 
+expires(ReqData, undefined=Cookie) ->
+    {undefined, ReqData, Cookie};
 expires(ReqData, Cookie) ->
     {?DATE_EXPIRES, ReqData, Cookie}.
 
 %% set resp.headers, echo evercookie as responce.
 provide_content(ReqData, Cookie) ->
-    {Cookie, ReqData, Cookie}.
+    Output = evercookie_lib:output(Cookie),
+    {Output, ReqData, Cookie}.
 

@@ -54,9 +54,9 @@ base64_transform(<<C,  Rest/binary>>, Acc) -> base64_transform(Rest, <<C,  Acc/b
 base64_transform(<<>>, Acc) -> Acc.
 
 base64_untransform(X) -> base64_untransform(X, <<>>).
-base64_untransform(<<$-, Rest/binary>>, Acc) -> base64_untransform(Rest, <<$+, Acc/binary>>);
-base64_untransform(<<$_, Rest/binary>>, Acc) -> base64_untransform(Rest, <<$/, Acc/binary>>);
-base64_untransform(<<$., Rest/binary>>, Acc) -> base64_untransform(Rest, <<$=, Acc/binary>>);
-base64_untransform(<<C,  Rest/binary>>, Acc) -> base64_untransform(Rest, <<C,  Acc/binary>>);
-base64_untransform(<<>>, Acc) -> Acc.
+base64_untransform([$-|T], Acc) -> base64_untransform(T, <<$+, Acc/binary>>);
+base64_untransform([$_|T], Acc) -> base64_untransform(T, <<$/, Acc/binary>>);
+base64_untransform([$.|T], Acc) -> base64_untransform(T, <<$=, Acc/binary>>);
+base64_untransform([C |T], Acc) -> base64_untransform(T, <<C,  Acc/binary>>);
+base64_untransform([], Acc) -> Acc.
 

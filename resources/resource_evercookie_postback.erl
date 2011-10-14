@@ -16,7 +16,9 @@ event({postback, cookie, _TriggerId, _TargetId}, Context) ->
 	    ?DEBUG({broadcast, Id}),
 	    z_notifier:notify({evercookie_id, Id}, Context);
 
-	_ -> ok
+	X ->
+	    ?DEBUG({X, CookieValue}),
+	    ok
     end,
     Context.
 

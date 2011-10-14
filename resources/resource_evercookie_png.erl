@@ -22,7 +22,6 @@ init(DispatchArgs) -> {ok, DispatchArgs}.
 %% @doc we don't have a cookie, user probably deleted it, force cache
 service_available(ReqData, _DispatchArgs) ->
     Cookie = wrq:get_cookie_value(?COOKIE_PNG, ReqData),
-    ?DEBUG({?COOKIE_PNG, Cookie}),
     Result = case Cookie of
 	undefined -> {halt, 304};
 	_	  -> true

@@ -5,6 +5,7 @@
 -mod_description("Evercookie is extremely persistent cookie in a browser. See http://samy.pl/evercookie/").
 
 -export([
+	init/1,
 	new/1, new/2,
 	get_id/2,
 	alias2name/1
@@ -12,6 +13,16 @@
 
 -include("zotonic.hrl").
 -include("include/evercookie.hrl").
+
+
+init(Context) ->
+    %% FIXME need test for php-gd persistence
+    case os:cmd("php --version") of 
+	"PHP 5"++_ -> ok;
+	_	   -> ?ERROR("~p: Please install PHP 5 and php-gd lib. Php-gd is used by evercookie png generator.", [?MODULE])
+    end,
+    z_notifier:observe(evercookie_postback, {m_evercookie, observe_evercookie_postback}, Context),
+    ok.
 
 
 %% @doc generate new immutable cookie body

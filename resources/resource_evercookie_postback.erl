@@ -13,8 +13,7 @@ event({postback, cookie, _TriggerId, _TargetId}, Context) ->
     case mod_evercookie:get_id(CookieValue, Context) of
 	{ok, Id} -> 
 	    %% all ok - send async broadcast
-	    ?DEBUG({broadcast, Id}),
-	    z_notifier:notify({evercookie_id, Id}, Context);
+	    z_notifier:notify({evercookie_postback, z_acl:user(Context), Id}, Context);
 
 	_ -> ok
     end,

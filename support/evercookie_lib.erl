@@ -14,3 +14,5 @@ get_etag(ReqData) ->
 set_etag(Value, ReqData) ->
     wrq:set_resp_header("Etag", Value, ReqData).
 
+output(Text) ->
+    [<<"//">>, Text].

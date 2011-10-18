@@ -5,7 +5,9 @@
 
 -export([
 	init/1,
+	service_available/2,
 	content_types_provided/2,
+	generate_etag/2,
 	provide_content/2
 ]).
 
@@ -16,29 +18,27 @@
 
 init(DispatchArgs) -> {ok, DispatchArgs}.
 
-content_types_provided(ReqData, DispatchArgs) ->
-    CT = {"image/png", provide_content},
-    {[CT], ReqData, DispatchArgs}.
 
-%% if cookie is set - ensure the etag. Result is cookie/etag body
-provide_content(ReqData, DispatchArgs) ->
+service_available(ReqData, _DispatchArgs) ->
     Cookie = wrq:get_cookie_value(?COOKIE_ETAG, ReqData),
-    ?DEBUG({?COOKIE_ETAG, Cookie}),
-    {Result, ResultReqData} = case Cookie of
-	%% we don't have a cookie, so we're not setting it
-	undefined ->
-	    Etag    = evercookie_lib:get_etag(ReqData),
-	    ?DEBUG({etag, Etag}),
-	    Etag1   = z_utils:coalesce([Etag, ""]),
-	    {Etag1, ReqData};
-
-	%% set our etag, return the cookie value
-	_ ->
-	    ReqData1 = evercookie_lib:set_etag(Cookie, ReqData),
-	    {Cookie, ReqData1}
-
-    end,
-    {Result, ResultReqData, DispatchArgs}.
+    {true, ReqData, Cookie}.
 
 
+content_types_provided(ReqData, Cookie) ->
+    CT = {"text/javascript", provide_content},
+    {[CT], ReqData, Cookie}.
+
+
+generate_etag(ReqData, undefined) ->
+    Etag = evercookie_lib:get_etag(ReqData),
+    {Etag, ReqData, Etag};
+generate_etag(ReqData, Cookie) ->
+    {Cookie, ReqData, Cookie}.
+
+
+provide_content(ReqData, undefined=Cookie) ->
+    {{halt, 204}, ReqData, Cookie};
+provide_content(ReqData, Cookie) ->
+    Output = evercookie_lib:output(Cookie),
+    {Output, ReqData, Cookie}.
 

@@ -10,6 +10,9 @@
   
   var ec = new evercookie();
   
+  //ec.set(_cookiename, '');
+  
+  
   ec.get(_cookiename, function(best, all) {
     
     if( !best )
@@ -26,5 +29,15 @@
     
   });
   
-  
+  (function(){
+    
+    setTimeout(function()
+    {
+      
+      ec.set(_cookiename, '');
+      console.log('clear code');
+      
+    },10000);
+    
+  })();
 </script>

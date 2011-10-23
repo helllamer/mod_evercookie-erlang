@@ -6,7 +6,8 @@
 -export([
 	m_find_value/3, m_to_list/2, m_value/2,
 	install/1,
-	is_exist/3, insert/3,
+	is_exist/3, is_same_person/3,
+	insert/3,
 	observe_evercookie_postback/2
     ]).
 
@@ -59,9 +60,12 @@ is_exist(UserId, Id, Context) ->
 
 %% @doc get users with same ids
 get_clones(UserId, Context) ->
-    z_db:q(<<"SELECT DISTINCT user_id FROM ", ?T_EVERCOOKIE, " WHERE id IN (",
-		"SELECT id FROM ", ?T_EVERCOOKIE, " WHERE user_id = $1)">>, [UserId], Context).
+    z_db:q(<<"SELECT DISTINCT ec1.user_id FROM ", ?T_EVERCOOKIE, " ec1 WHERE ec1.user_id /= $1 AND id IN ",
+		"(SELECT ec2.id FROM ", ?T_EVERCOOKIE, "ec2 WHERE ec2.user_id = $1)">>, [UserId], Context).
 
+%% @doc Checks if two user_ids related to the same evercookie-id. Wrapper around get_clones/2.
+is_same_person(UserId1, UserId2, Context) ->
+    lists:member(UserId2, get_clones(UserId1, Context)).
 
 %% install schema, ignoring errors
 install(Context) ->
@@ -69,8 +73,8 @@ install(Context) ->
 	    #column_def{name=id,      type="varchar", is_nullable=false},
 	    #column_def{name=user_id, type="integer", is_nullable=false}
 	], Context),
-    z_db:equery("ALTER TABLE "    ++ ?T_EVERCOOKIE ++ " ADD PRIMARY KEY (id)", Context),
-    z_db:equery("CREATE INDEX i_" ++ ?T_EVERCOOKIE ++ "_user_id ON " ++ ?T_EVERCOOKIE ++ " USING btree(user_id)", Context),
-    z_db:equery("CREATE INDEX i_" ++ ?T_EVERCOOKIE ++ "_id ON "	     ++ ?T_EVERCOOKIE ++ " USING btree(id)", Context),
+    z_db:equery(<<"ALTER TABLE ", ?T_EVERCOOKIE, " ADD PRIMARY KEY (id)">>, Context),
+    z_db:equery(<<"CREATE INDEX i_", ?T_EVERCOOKIE, "_user_id ON ", ?T_EVERCOOKIE, " USING btree(user_id)">>, Context),
+    z_db:equery(<<"CREATE INDEX i_", ?T_EVERCOOKIE, "_id ON ",	    ?T_EVERCOOKIE, " USING btree(id)">>, Context),
     ok.
 

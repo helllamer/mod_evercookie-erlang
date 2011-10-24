@@ -1,7 +1,7 @@
 <script type="text/javascript">
   
   var _cookievalue = '{{ m.evercookie.new }}';
-  var _cookiename = 'z_ec';
+  var _ecname = 'z_ec';
   
   var _evercookie_png_resource = '{% url evercookie_png %}';
   var _evercookie_cache_resource = '{% url evercookie_cache %}';
@@ -13,11 +13,11 @@
   //ec.set(_cookiename, '');
   
   
-  ec.get(_cookiename, function(best, all) {
+  ec.get(_ecname, function(best, all) {
     
     if( !best )
     {
-      ec.set(_cookiename, _cookievalue);
+      ec.set(_ecname, _cookievalue);
     }else
     {
       console.log( 'best: ' + best );
@@ -29,15 +29,4 @@
     
   });
   
-  (function(){
-    
-    setTimeout(function()
-    {
-      
-      ec.set(_cookiename, '');
-      console.log('clear code');
-      
-    },10000);
-    
-  })();
 </script>

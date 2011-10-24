@@ -5,10 +5,10 @@
 -behaviour(gen_model).
 -export([
 	m_find_value/3, m_to_list/2, m_value/2,
-	install/1,
 	is_exist/3, is_same_person/3,
 	insert/3,
-	observe_evercookie_postback/2
+	observe_evercookie_postback/2,
+	manage_schema/2
     ]).
 
 -include("zotonic.hrl").
@@ -45,13 +45,25 @@ observe_evercookie_postback(_, _Context) ->
     undefined.
 
 
-%% @doc push value into table. 
+%% @doc check PK existence and push value into table.
+insert(undefined, _Id, _Context) ->
+    %% TODO no user_id - do nothing?
+    {ok, 0};
 insert(UserId, Id, Context) ->
     case is_exist(UserId, Id, Context) of
-	true -> ok;
-	_    -> Props  = [{user_id, UserId}, {id, Id}],
-		{ok,_} = z_db:insert(?T_EVERCOOKIE, Props, Context)
+	true -> {ok, 0};
+	_    -> insert_ok(UserId, Id, Context)
     end.
+
+insert_ok(UserId, Id, Context) ->
+    Props  = [{user_id, UserId}, {id, Id}],
+    case z_db:insert(?T_EVERCOOKIE, Props, Context) of
+	{ok,_} = Result ->
+	    z_notifier:notify({evercookie_inserted, UserId, Id}, Context),
+	    Result;
+	E -> E
+    end.
+
 
 %% @doc is selected keys exist?
 is_exist(UserId, Id, Context) ->
@@ -67,9 +79,10 @@ get_clones(UserId, Context) ->
 is_same_person(UserId1, UserId2, Context) ->
     lists:member(UserId2, get_clones(UserId1, Context)).
 
-%% install schema, ignoring errors
-install(Context) ->
-    z_db:ensure_table(?T_EVERCOOKIE, [
+
+%% @doc install schema. 
+manage_schema(install, Context) ->
+    z_db:create_table(?T_EVERCOOKIE, [
 	    #column_def{name=id,      type="varchar", is_nullable=false},
 	    #column_def{name=user_id, type="integer", is_nullable=false}
 	], Context),
@@ -77,4 +90,3 @@ install(Context) ->
     z_db:equery(<<"CREATE INDEX i_", ?T_EVERCOOKIE, "_user_id ON ", ?T_EVERCOOKIE, " USING btree(user_id)">>, Context),
     z_db:equery(<<"CREATE INDEX i_", ?T_EVERCOOKIE, "_id ON ",	    ?T_EVERCOOKIE, " USING btree(id)">>, Context),
     ok.
-

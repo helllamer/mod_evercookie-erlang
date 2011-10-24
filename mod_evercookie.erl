@@ -8,9 +8,11 @@
 	init/1,
 	new/1, new/2,
 	get_id/2,
-	alias2name/1
+	alias2name/1,
+	manage_schema/2
     ]).
 
+-mod_schema(1).
 -include("zotonic.hrl").
 -include("include/evercookie.hrl").
 
@@ -21,7 +23,6 @@ init(Context) ->
 	"PHP 5"++_ -> ok;
 	_	   -> ?ERROR("~p: Please install PHP 5 and php-gd lib. Php-gd is used by evercookie png generator.", [?MODULE])
     end,
-    m_evercookie:install(Context),
     z_notifier:observe(evercookie_postback, {m_evercookie, observe_evercookie_postback}, Context),
     ok.
 
@@ -71,4 +72,9 @@ base64_untransform([$_|T], Acc) -> base64_untransform(T, <<$/, Acc/binary>>);
 base64_untransform([$.|T], Acc) -> base64_untransform(T, <<$=, Acc/binary>>);
 base64_untransform([C |T], Acc) -> base64_untransform(T, <<C,  Acc/binary>>);
 base64_untransform([], Acc) -> Acc.
+
+
+%% @doc schema for mod_evercookie.
+manage_schema(What, Context) ->
+    m_evercookie:manage_schema(What, Context).
 

@@ -23,7 +23,7 @@ init(Context) ->
 	"PHP 5"++_ -> ok;
 	_	   -> ?ERROR("~p: Please install PHP 5 and php-gd lib. Php-gd is used by evercookie png generator.", [?MODULE])
     end,
-    z_notifier:observe(evercookie_postback, {m_evercookie, observe_evercookie_postback}, Context),
+    %z_notifier:observe(evercookie_postback, {m_evercookie, observe_evercookie_postback}, Context),
     ok.
 
 

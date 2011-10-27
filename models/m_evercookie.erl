@@ -7,7 +7,6 @@
 	m_find_value/3, m_to_list/2, m_value/2,
 	is_exist/3, is_same_person/3,
 	insert/3,
-	observe_evercookie_postback/2,
 	manage_schema/2
     ]).
 
@@ -38,12 +37,9 @@ m_find_value(_, _M, _Context) ->
 m_to_list(_M, _Context) -> [].
 m_value(_M, _Context)	-> undefined.
 
-%% resource_evercookie_postback received some spylogs - insert it into db
-observe_evercookie_postback({evercookie_postback, UserId, Id}, Context) when is_integer(UserId) ->
-    insert(UserId, Id, Context);
-observe_evercookie_postback(_, _Context) ->
-    undefined.
 
+%observe_search_query({search_query, {evercookie_list_clones, _Args}, _OffsetLimit}, Context) ->
+    %z_db:q(<<"SELECT id, array_agg(user_id) FROM ", ?T_EVERCOOKIE, " GROUP BY id">>, [], Context).
 
 %% @doc check PK existence and push value into table.
 insert(undefined, _Id, _Context) ->
@@ -56,7 +52,7 @@ insert(UserId, Id, Context) ->
     end.
 
 insert_ok(UserId, Id, Context) ->
-    Props  = [{user_id, UserId}, {id, Id}],
+    Props = [{user_id, UserId}, {id, Id}],
     case z_db:insert(?T_EVERCOOKIE, Props, Context) of
 	{ok,_} = Result ->
 	    z_notifier:notify({evercookie_inserted, UserId, Id}, Context),
@@ -67,7 +63,7 @@ insert_ok(UserId, Id, Context) ->
 
 %% @doc is selected keys exist?
 is_exist(UserId, Id, Context) ->
-    z_db:q1("SELECT count(*) > 0 FROM " ++ ?T_EVERCOOKIE ++ " WHERE user_id = $1 AND id = $2", [UserId, Id], Context).
+    z_db:q1(<<"SELECT count(*) > 0 FROM ", ?T_EVERCOOKIE, " WHERE user_id = $1 AND id = $2">>, [UserId, Id], Context).
 
 
 %% @doc get users with same ids

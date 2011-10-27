@@ -3,5 +3,7 @@
     {evercookie_history,	["ec", "h"],		resource_evercookie_history,	[{ssl, any}]},
     {evercookie_png,		["ec", "p"],		resource_evercookie_png,	[{ssl, any}]},
     {evercookie_cache,		["ec", "c"],		resource_evercookie_cache,	[{ssl, any}]},
-    {evercookie_etag,		["ec", "t"],		resource_evercookie_etag,	[{ssl, any}]}
+    {evercookie_etag,		["ec", "t"],		resource_evercookie_etag,	[{ssl, any}]},
+
+    {admin_mod_evercookie,	["admin", "evercookie"],  resource_admin,    [{template, "admin_mod_evercookie.tpl"}, {ssl, any}, {selected, "admin_mod_evercookie"}] }
 ].

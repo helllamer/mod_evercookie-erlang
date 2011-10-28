@@ -1,7 +1,6 @@
 -module(resource_evercookie_postback).
 
 %% Handle evercookie.js sniffing.
-%% Successive reports are broadcasted via z_notifier: {evercookie_id, Id} where Id is string like z_ids:id() result.
 
 -export([event/2]).
 

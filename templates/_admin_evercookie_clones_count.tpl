@@ -8,11 +8,18 @@
 
 
 {% block widget_content %}
-    {% for user_id  in  m.evercookie.clones[id] %}
-	{% with m.rsc[user_id] as r %}
-	    <a href="{% url admin_edit_rsc id=user_id %}">{% image r.depiction %} {{ r.title }}</a>,
-	{% endwith %}
+<ul class="short-list">
+    {% for user_ids  in  m.evercookie.clones.all %}
+	<li class="clearfix">
+	    {% for user_id  in  user_ids %}
+		{% with m.rsc[user_id] as r %}
+		    <a href="{% url admin_edit_rsc id=user_id %}">{% image r.depiction %} {{ r.title }}</a>
+		    -
+		{% endwith %}
+	    {% endfor %}
+	</li>
     {% empty %}
-	This user has no detected virtuals.
+	<li><i>There are no virtuals for all users.</i></li>
     {% endfor %}
+</ul>
 {% endblock %}

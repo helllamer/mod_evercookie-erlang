@@ -12,18 +12,17 @@
 	manage_schema/2
     ]).
 
--mod_schema(1).
+-mod_schema(2).
 -include("zotonic.hrl").
 -include("include/evercookie.hrl").
 
 
-init(Context) ->
+init(_Context) ->
     %% FIXME need test for php-gd persistence
     case os:cmd("php --version") of 
 	"PHP 5"++_ -> ok;
 	_	   -> ?ERROR("~p: Please install PHP 5 and php-gd lib. Php-gd is used by evercookie png generator.", [?MODULE])
     end,
-    %z_notifier:observe(evercookie_postback, {m_evercookie, observe_evercookie_postback}, Context),
     ok.
 
 

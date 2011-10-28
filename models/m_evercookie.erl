@@ -16,8 +16,11 @@
 -define(T_EVERCOOKIE,		"evercookie").
 
 
-m_find_value(new, #m{value=undefined}, Context) ->
+%% print new id
+m_find_value(new, #m{value=undefined}, Context) ->	%% m.this.new
     mod_evercookie:new(Context);
+m_find_value(can_admin, #m{value=undefined}, Context) -> %% m.this.can_admin
+    intarray_installed(Context);
 m_find_value(Atom, #m{value=undefined} = M, _Context) when is_atom(Atom) ->
     M#m{value=Atom};
 
@@ -27,7 +30,9 @@ m_find_value(Id, #m{value=pickle}, Context) ->
     mod_evercookie:new(Id, Context);
 m_find_value(V,  #m{value=depickle}, Context) ->
     mod_evercookie:get_id(V, Context);
-m_find_value(UserId, #m{value=clones}, Context) ->
+m_find_value(all, #m{value=clones}, Context) ->		%% m.this.clones.all
+    list_clones(Context);
+m_find_value(UserId, #m{value=clones}, Context) ->	%% m.this.clones[user_id]
     get_clones(UserId, Context);
 
 m_find_value(_, _M, _Context) ->
@@ -38,8 +43,22 @@ m_to_list(_M, _Context) -> [].
 m_value(_M, _Context)	-> undefined.
 
 
-%observe_search_query({search_query, {evercookie_list_clones, _Args}, _OffsetLimit}, Context) ->
-    %z_db:q(<<"SELECT id, array_agg(user_id) FROM ", ?T_EVERCOOKIE, " GROUP BY id">>, [], Context).
+list_clones(Context) ->
+    Result = z_db:q(<<
+	"SELECT x.* FROM ("
+	  "SELECT DISTINCT c.user_ids FROM ("
+	    "WITH T AS ("
+		"SELECT id, array_agg(user_id) AS user_ids FROM ", ?T_EVERCOOKIE, " WHERE user_id != $1 GROUP BY id",
+	    ") SELECT uniq(sort_asc(t1.user_ids || t2.user_ids)) AS user_ids",
+	      " FROM T t1",
+	      " LEFT OUTER JOIN T t2 ON (t1.user_ids && t2.user_ids)"
+	  ") c WHERE icount(c.user_ids) > 1",
+	") x ORDER BY icount(x.user_ids) DESC">>, [?ACL_ADMIN_USER_ID], Context),
+    PgArray2ListF = fun({PgArray}) ->
+	    Str = binary_to_list(PgArray),
+	    [ list_to_integer(E) || E <- string:tokens(Str, "{,}") ]
+    end,
+    lists:map(PgArray2ListF, Result).
 
 %% @doc check PK existence and push value into table.
 insert(undefined, _Id, _Context) ->
@@ -76,13 +95,29 @@ is_same_person(UserId1, UserId2, Context) ->
     lists:member(UserId2, get_clones(UserId1, Context)).
 
 
+%% @doc check if intarray extension installed. Do not using pg_extensions (only available on pg >= 9.1)
+intarray_installed(Context) ->
+    case element(1, z_db:equery(<<"SELECT icount('{1,2,3}'::int[])">>, Context)) of
+	ok    -> true;
+	error -> false
+    end.
+
+
 %% @doc install schema. 
 manage_schema(install, Context) ->
+    %% raise message in console, if intarray not installed.
+    intarray_installed(Context) orelse
+	?ERROR("mod_evercookie: Please install `intarray` extension~n"
+	    ++ "\t\tCREATE EXTENSION intarray WITH SCHEMA ~s~n"
+	    ++ "or /admin/evercookie will not work.", [m_site:get(dbschema, Context)]
+	),
+    %% and install table, indexes, etc...
     z_db:create_table(?T_EVERCOOKIE, [
 	    #column_def{name=id,      type="varchar", is_nullable=false},
 	    #column_def{name=user_id, type="integer", is_nullable=false}
 	], Context),
-    z_db:equery(<<"ALTER TABLE ", ?T_EVERCOOKIE, " ADD PRIMARY KEY (id)">>, Context),
+    z_db:equery(<<"ALTER TABLE ", ?T_EVERCOOKIE, " ADD PRIMARY KEY (id, user_id)">>, Context),
     z_db:equery(<<"CREATE INDEX i_", ?T_EVERCOOKIE, "_user_id ON ", ?T_EVERCOOKIE, " USING btree(user_id)">>, Context),
     z_db:equery(<<"CREATE INDEX i_", ?T_EVERCOOKIE, "_id ON ",	    ?T_EVERCOOKIE, " USING btree(id)">>, Context),
     ok.
+

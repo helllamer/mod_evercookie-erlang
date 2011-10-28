@@ -12,7 +12,7 @@
 	manage_schema/2
     ]).
 
--mod_schema(2).
+-mod_schema(1).
 -include("zotonic.hrl").
 -include("include/evercookie.hrl").
 

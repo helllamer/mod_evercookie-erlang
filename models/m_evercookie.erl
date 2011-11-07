@@ -88,7 +88,7 @@ is_exist(UserId, Id, Context) ->
 %% @doc get users with same ids
 get_clones(UserId, Context) ->
     z_db:q(<<"SELECT DISTINCT ec1.user_id FROM ", ?T_EVERCOOKIE, " ec1 WHERE ec1.user_id /= $1 AND id IN ",
-		"(SELECT ec2.id FROM ", ?T_EVERCOOKIE, "ec2 WHERE ec2.user_id = $1)">>, [UserId], Context).
+		"(SELECT ec2.id FROM ", ?T_EVERCOOKIE, " ec2 WHERE ec2.user_id = $1::int)">>, [UserId], Context).
 
 %% @doc Checks if two user_ids related to the same evercookie-id. Wrapper around get_clones/2.
 is_same_person(UserId1, UserId2, Context) ->

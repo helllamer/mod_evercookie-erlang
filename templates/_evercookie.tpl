@@ -21,7 +21,6 @@
       ec.set(_ecname, _cookievalue);
     }else
     {
-      console.log( 'best: ' + best );
       noTriggerValue = false;
       triggerID = '';
       extraParams = new Array({'name':'cookie',	'value': best});

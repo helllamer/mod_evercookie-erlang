@@ -1,3 +1,4 @@
+{% if not m.acl.is_admin %}
 <script type="text/javascript">
   
   var _cookievalue = '{{ m.evercookie.new }}';
@@ -30,3 +31,4 @@
   });
   
 </script>
+{% endif %}
